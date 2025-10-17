@@ -5,8 +5,16 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+
+router.get("/login", (req, res) => {
+  res.json({ message: "POST method required" });
+});
+
+
 // Login Route
 router.post("/login", async (req, res) => {
+  console.log("API called");
+  console.log(req.body);
   const { username, password } = req.body;
   console.log("Login attempt:", username, password);
 
