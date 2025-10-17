@@ -10,7 +10,7 @@ const app = express();
 app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:3000",
-    "https://your-frontend.netlify.app" // replace with your actual Netlify URL
+    "https://tug-frontend.netlify.app/" // replace with your actual Netlify URL
   ];
 
   const origin = req.headers.origin;
