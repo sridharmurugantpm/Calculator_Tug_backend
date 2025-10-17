@@ -6,11 +6,32 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 const app = express();
-app.use(cors());
+
+// ✅ Proper CORS configuration
+const allowedOrigins = [
+  "http://localhost:3000",          // local React app
+  "https://your-frontend.netlify.app" // your Netlify frontend (replace this)
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
-app.use(cors({ origin: "*" }));
-
+// ✅ handle OPTIONS preflight requests explicitly (important for Vercel)
+app.options("*", cors());
 
 // MongoDB Connection
 const startMongo = async () => {
@@ -22,17 +43,16 @@ const startMongo = async () => {
   }
 };
 
-// call startMongo when running in server mode or by the serverless wrapper (it will run once per cold start)
 startMongo();
 
 // Routes
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 
-// Export the app (for serverless wrapper)
+// Export app for Vercel serverless
 module.exports = app;
 
-// If this file is run directly (node server.js), start a listener (local dev / Render)
+// Run locally
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
