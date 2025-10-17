@@ -2,32 +2,38 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require("cors"); // ✅ 1. Import cors
 
 dotenv.config();
 const app = express();
 
-// ✅ CORS middleware for Netlify + Local + Vercel
+// ✅ 2. Define your allowed origins
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://tug-frontend.netlify.app"
+];
+
+// ✅ 3. Use the cors middleware with options
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = "The CORS policy for this site does not allow access from the specified Origin.";
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true, // Allow cookies to be sent
+}));
+
+
+// ❌ DELETE YOUR OLD MIDDLEWARE
+/*
 app.use((req, res, next) => {
-  const allowedOrigins = [
-    "http://localhost:3000",
-    "https://tug-frontend.netlify.app"
-  ];
-  const origin = req.headers.origin;
-
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-
-  next();
+  ... your old code here ...
 });
+*/
 
 app.use(express.json());
 
