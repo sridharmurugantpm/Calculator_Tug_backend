@@ -10,16 +10,27 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, {
-  // useNewUrlParser: true,
-  // useUnifiedTopology: true,
-})
-.then(() => console.log("MongoDB Connected"))
-.catch((err) => console.log(err));
+const startMongo = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("MongoDB Connected");
+  } catch (err) {
+    console.error("MongoDB err:", err);
+  }
+};
+
+// call startMongo when running in server mode or by the serverless wrapper (it will run once per cold start)
+startMongo();
 
 // Routes
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Export the app (for serverless wrapper)
+module.exports = app;
+
+// If this file is run directly (node server.js), start a listener (local dev / Render)
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
