@@ -10,7 +10,7 @@ const app = express();
 // ✅ 1. Define allowed origins (frontend + localhost)
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://your-frontend.netlify.app" // replace this with your actual Netlify domain
+  "https://tug-frontend.netlify.app/" // replace this with your actual Netlify domain
 ];
 
 // ✅ 2. Manual CORS middleware (works 100% with Vercel)
