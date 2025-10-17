@@ -1,30 +1,29 @@
 // server.js
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors");
 const dotenv = require("dotenv");
 
 dotenv.config();
 const app = express();
 
-// ✅ 1. Define allowed origins (frontend + localhost)
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://tug-frontend.netlify.app/" // replace this with your actual Netlify domain
-];
-
-// ✅ 2. Manual CORS middleware (works 100% with Vercel)
+// ✅ Middleware to handle CORS manually
 app.use((req, res, next) => {
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "https://your-frontend.netlify.app" // replace with your actual Netlify URL
+  ];
+
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   }
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
-  res.setHeader("Access-Control-Allow-Credentials", "true");
+
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // ✅ immediately handle preflight
+    return res.status(200).end();
   }
 
   next();
@@ -32,25 +31,20 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// ✅ 3. MongoDB connection
-const startMongo = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("MongoDB Connected");
-  } catch (err) {
-    console.error("MongoDB err:", err);
-  }
-};
-startMongo();
+// ✅ MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB err:", err));
 
-// ✅ 4. Routes
+// ✅ Routes
 const authRoutes = require("./routes/auth");
 app.use("/api/auth", authRoutes);
 
-// ✅ 5. Export for Vercel
+// ✅ Export for Vercel
 module.exports = app;
 
-// ✅ 6. Local development
+// ✅ Run locally
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
